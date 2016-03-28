@@ -1,5 +1,8 @@
 # ember-data-autoreload
 
+[![Build Status](https://travis-ci.org/joukevandermaas/ember-data-autoreload.svg?branch=master)](https://travis-ci.org/joukevandermaas/ember-data-autoreload)
+
+
 `ember-data-autoreload` allows you to auto-reload models after some time 
 has passed. It provides a mixin you can add to any Ember Data model:
 
