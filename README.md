@@ -47,9 +47,20 @@ property. Every time the model doesn't change, the new delay is calculated using
 
 ## Hooks
 
-`ember-data-autoreload` provides two hooks into the auto reload process: `willAutoReload` and
+`ember-data-autoreload` provides three hooks into the auto reload process: `shouldAutoReload`, `willAutoReload` and
 `didAutoReload`. If you want to manually adjust the delay between auto reloads, or trigger side-effects,
-you can do so here. Both hooks are promise-aware.
+you can do so here. All hooks are promise-aware.
+
+### `shouldAutoReload` *(snapshot)*
+
+This hook is called before a reload occurs. If you return `false` (or promise that resolves to `false`) from
+here, the model will not be reloaded until the next timeout period has passed. If you return `true`, the
+model will reload.
+
+#### Parameters:
+
+**snapshot** [Ember Data Snapshot](http://emberjs.com/api/data/classes/DS.Snapshot.html)  
+A snapshot of the model before reloading.
 
 ### `willAutoReload` *(snapshot)*
 

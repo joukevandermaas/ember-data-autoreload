@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import { task, timeout } from 'ember-concurrency';
 
-const { Mixin, assert, RSVP: { resolve } } = Ember;
+const { Mixin, assert, RSVP: { resolve }, isArray } = Ember;
 
 export default Mixin.create({
   /* overridable properties/methods */
@@ -14,6 +14,10 @@ export default Mixin.create({
 
   willAutoReload(/* currentSnapshot */) { },
   didAutoReload(/* attributesChanged, newSnapshot, oldSnapshot */) { },
+
+  shouldAutoReload(/* currentSnapshot */) {
+    return true;
+  },
 
   /* end overridable properties/methods */
 
@@ -45,13 +49,20 @@ export default Mixin.create({
 
       let oldState = this._createSnapshot();
 
-      if (this.get('isLoaded') && !this.get('isDeleted')) {
+      if (this.get('isLoaded') &&
+          !this.get('isDeleted')) {
+        let shouldReload = yield resolve(this.shouldAutoReload(oldState));
+
+        if (!shouldReload) {
+          continue;
+        }
+
         yield resolve(this.willAutoReload(oldState));
         yield this.reload();
 
         let newState = this._createSnapshot();
 
-        let changeOccured = this._didAttributesChange(oldState, newState);
+        let changeOccured = this._didAttributesChange(oldState.attributes(), newState.attributes());
         yield resolve(this.didAutoReload(changeOccured, newState, oldState));
 
         nextDelay = this._getNextReloadDelay(nextDelay, changeOccured);
@@ -75,12 +86,32 @@ export default Mixin.create({
     }
   },
 
-  _didAttributesChange(oldSnapshot, newSnapshot) {
-    let oldAttrs = oldSnapshot.attributes();
-    let newAttrs = newSnapshot.attributes();
-
+  _didAttributesChange(oldAttrs, newAttrs) {
     for (let key in oldAttrs) {
-      if (oldAttrs[key] !== newAttrs[key]) {
+      if (isArray(oldAttrs[key] && isArray[newAttrs[key]])) {
+        if (oldAttrs[key].length === newAttrs[key].length) {
+          let allItemsSame = true;
+          for (let i = 0; i < oldAttrs[key].length; i++) {
+            if (this._didAttributesChange(oldAttrs[key][i], newAttrs[key][i])) {
+              allItemsSame = false;
+              break;
+            }
+          }
+
+          if (!allItemsSame) {
+            return true;
+          }
+        }
+
+        return true;
+      } else if ((oldAttrs[key] && typeof oldAttrs[key] === 'object') &&
+        (newAttrs[key] && typeof newAttrs[key] === 'object')) {
+
+        // recursively go through the hash
+        if (this._didAttributesChange(oldAttrs[key], newAttrs[key])) {
+          return true;
+        }
+      } else if (oldAttrs[key] !== newAttrs[key]) {
         return true;
       }
     }
