@@ -15,3 +15,8 @@
 /libpeerconnection.log
 npm-debug.log
 testem.log
+
+.vscodeignore
+jsconfig.json
+settings.json
+ember.d.ts
