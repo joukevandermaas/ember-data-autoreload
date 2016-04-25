@@ -1,6 +1,6 @@
 {
   "name": "ember-data-autoreload",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Add support for auto-reloading to Ember Data models.",
   "directories": {
     "doc": "doc",
