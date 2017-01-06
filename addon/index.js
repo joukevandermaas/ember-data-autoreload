@@ -66,6 +66,8 @@ export default Mixin.create({
         yield resolve(this.didAutoReload(changeOccured, newState, oldState));
 
         nextDelay = this._getNextReloadDelay(nextDelay, changeOccured);
+      } else {
+        break;
       }
     }
   }).drop(),
